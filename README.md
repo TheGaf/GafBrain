@@ -1,8 +1,8 @@
 GafBrain Kit
 
-INSTALL GUIDE (READ ONLY THIS FIRST)
+INSTALL GUIDE (READ THIS FIRST)
 
-This is a 5-minute setup.
+This is a 5-minute setup if you follow steps exactly.
 
 ------------------------------------------------------------
 
@@ -14,9 +14,9 @@ Google Drive + ChatGPT + a local compiler
 
 into a persistent memory system.
 
-ChatGPT = reads memory  
-Google Drive = stores memory  
-Compiler = organizes memory  
+ChatGPT = reads memory
+Google Drive = stores memory
+Compiler = organizes memory
 
 ------------------------------------------------------------
 
@@ -26,11 +26,11 @@ You need:
 
 - Google Drive account
 - ChatGPT account
-- Mac or PC
-- Terminal
+- Computer (Mac or PC)
+- Terminal access
 - Node.js installed
 
-If Node is not installed:
+If Node.js is not installed:
 https://nodejs.org
 
 ------------------------------------------------------------
@@ -41,11 +41,11 @@ Open:
 
 https://drive.google.com
 
-Create folder:
+Create a folder named:
 
 GafBrain
 
-Do NOT rename it.
+Do not rename it.
 
 ------------------------------------------------------------
 
@@ -59,12 +59,12 @@ Inside GafBrain, create:
 - Projects
 - Sessions
 
-Inside ChatGPT create:
+Inside ChatGPT, create:
 
 - export
 - normalized
 
-Do nothing else in here.
+Do not add anything else.
 
 ------------------------------------------------------------
 
@@ -78,7 +78,7 @@ Download export file.
 
 Unzip it.
 
-Move files into:
+Move exported files into:
 
 GafBrain/ChatGPT/export
 
@@ -92,7 +92,7 @@ Settings → Connectors → Google Drive
 
 Connect your account.
 
-Select access to GafBrain folder.
+Grant access to your GafBrain folder.
 
 ------------------------------------------------------------
 
@@ -104,7 +104,7 @@ Unzip it.
 
 Open Terminal.
 
-Go into folder:
+Go into the folder:
 
 cd ~/Desktop/GafBrain-Kit
 
@@ -112,20 +112,20 @@ cd ~/Desktop/GafBrain-Kit
 
 STEP 6 — RUN THE COMPILER
 
-Run exactly this:
+Run exactly:
 
 node app/Compiler/compile-chatgpt.js
 
-Wait until it finishes.
+Wait for it to complete.
 
 ------------------------------------------------------------
 
-WHAT HAPPENS WHEN YOU RUN IT
+WHAT THE COMPILER DOES
 
 The compiler:
 
 1. Reads ChatGPT exports from Google Drive
-2. Cleans and organizes text
+2. Cleans and normalizes text
 3. Extracts:
    - decisions
    - topics
@@ -136,7 +136,7 @@ The compiler:
 
 GafBrain/Brain
 
-5. Builds index in:
+5. Builds searchable index in:
 
 GafBrain/Index
 
@@ -144,16 +144,14 @@ GafBrain/Index
 
 HOW YOU USE IT
 
-After setup, you NEVER touch files manually.
-
-You only ask ChatGPT:
+After setup, you only interact with ChatGPT:
 
 - What did I decide about this?
 - What have I said about this before?
 - Summarize my past conversations
 - Show my history with X
 
-ChatGPT reads your Drive and reconstructs memory.
+ChatGPT reads your Google Drive and reconstructs memory.
 
 ------------------------------------------------------------
 
@@ -167,4 +165,4 @@ RULES (IMPORTANT)
 
 DONE
 
-If you followed steps, system is working.
+If you followed steps correctly, the system is working.
