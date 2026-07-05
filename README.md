@@ -1,46 +1,55 @@
 GafBrain Kit
 
-This system turns Google Drive into long-term memory for ChatGPT.
+INSTALL GUIDE (READ ONLY THIS FIRST)
 
-It is designed to be extremely simple.
-
-If you can create folders and run one terminal command, you can use this system.
+This is a 5-minute setup.
 
 ------------------------------------------------------------
 
 WHAT THIS IS
 
-GafBrain Kit connects two things:
+GafBrain turns:
 
-1. ChatGPT (reasoning)
-2. Google Drive (storage)
+Google Drive + ChatGPT + a local compiler
 
-A third component called the Compiler organizes the data stored in Google Drive so ChatGPT can use it as structured memory.
+into a persistent memory system.
 
-Together, this creates persistent memory for ChatGPT.
+ChatGPT = reads memory  
+Google Drive = stores memory  
+Compiler = organizes memory  
 
 ------------------------------------------------------------
 
-WHAT YOU NEED
+REQUIREMENTS
+
+You need:
 
 - Google Drive account
 - ChatGPT account
-- A computer with Terminal
+- Mac or PC
+- Terminal
 - Node.js installed
+
+If Node is not installed:
+https://nodejs.org
 
 ------------------------------------------------------------
 
-STEP 1 - CREATE GOOGLE DRIVE FOLDER
+STEP 1 — CREATE GOOGLE DRIVE FOLDER
 
-Go to https://drive.google.com
+Open:
 
-Create a folder named:
+https://drive.google.com
+
+Create folder:
 
 GafBrain
 
+Do NOT rename it.
+
 ------------------------------------------------------------
 
-STEP 2 - CREATE FOLDERS INSIDE GOOGLE DRIVE
+STEP 2 — CREATE FOLDER STRUCTURE
 
 Inside GafBrain, create:
 
@@ -55,111 +64,107 @@ Inside ChatGPT create:
 export
 normalized
 
-------------------------------------------------------------
-
-STEP 3 - EXPORT CHATGPT DATA
-
-Go to ChatGPT settings:
-
-Settings → Data Controls → Export Data
-
-Download and unzip the file.
-
-Put exported files into:
-
-GafBrain / ChatGPT / export
+STOP HERE. Do nothing else.
 
 ------------------------------------------------------------
 
-STEP 4 - CONNECT GOOGLE DRIVE TO CHATGPT
+STEP 3 — EXPORT CHATGPT DATA
 
 In ChatGPT:
 
-Settings → Connectors → Google Drive → Connect
+Settings → Data Controls → Export Data
 
-Allow access to your GafBrain folder.
+Download export file.
+
+Unzip it.
+
+Move files into:
+
+GafBrain/ChatGPT/export
 
 ------------------------------------------------------------
 
-STEP 5 - DOWNLOAD THIS PROJECT
+STEP 4 — CONNECT CHATGPT TO GOOGLE DRIVE
 
-Download the GafBrain Kit ZIP file and unzip it.
+In ChatGPT:
 
-Open Terminal and go into the folder:
+Settings → Connectors → Google Drive
+
+Connect your account.
+
+Select access to GafBrain folder.
+
+------------------------------------------------------------
+
+STEP 5 — DOWNLOAD THIS PROJECT
+
+Download the GafBrain Kit ZIP.
+
+Unzip it.
+
+Open Terminal.
+
+Go into folder:
 
 cd ~/Desktop/GafBrain-Kit
 
 ------------------------------------------------------------
 
-STEP 6 - RUN THE COMPILER
+STEP 6 — RUN THE COMPILER
 
-Run this command:
+Run exactly this:
 
 node app/Compiler/compile-chatgpt.js
 
-------------------------------------------------------------
-
-WHAT THE COMPILER DOES
-
-The compiler reads your Google Drive data and builds structured memory.
-
-It processes:
-
-- ChatGPT exports
-- notes
-- text files stored in Google Drive
-
-It outputs structured memory into:
-
-GafBrain / Brain
+Wait until it finishes.
 
 ------------------------------------------------------------
 
-OUTPUT FILES
+WHAT HAPPENS WHEN YOU RUN IT
 
-Brain contains:
+The compiler:
 
-CORE.md
-WORKING.md
-DECISIONS.md
-PROJECTS.md
-PEOPLE.md
-TIMELINE.md
-PRINCIPLES.md
+1. Reads ChatGPT exports from Google Drive
+2. Cleans and organizes text
+3. Extracts:
+   - decisions
+   - topics
+   - people
+   - projects
+   - timeline events
+4. Writes structured memory into:
 
-Index contains searchable memory structure.
+GafBrain/Brain
+
+5. Builds index in:
+
+GafBrain/Index
 
 ------------------------------------------------------------
 
 HOW YOU USE IT
 
-After setup, you ask ChatGPT:
+After setup, you NEVER touch files manually.
+
+You only ask ChatGPT:
 
 - What did I decide about this?
-- What have I said before about this topic?
+- What have I said about this before?
 - Summarize my past conversations
-- Show my history with this project
+- Show my history with X
 
-ChatGPT uses Google Drive to retrieve your memory.
+ChatGPT reads your Drive and reconstructs memory.
 
 ------------------------------------------------------------
 
-IMPORTANT RULES
+RULES (IMPORTANT)
 
 - The compiler organizes everything
 - Do not store personal data in GitHub
+- Do not modify folder structure
 
 ------------------------------------------------------------
 
-RESULT
+DONE
 
-You get:
-
-- persistent memory for ChatGPT
-- structured history of your conversations
-- cross-session continuity
-- searchable knowledge system
-
-------------------------------------------------------------
-
-END
+If you followed steps, system is working.
