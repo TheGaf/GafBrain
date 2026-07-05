@@ -53,18 +53,18 @@ STEP 2 — CREATE FOLDER STRUCTURE
 
 Inside GafBrain, create:
 
-ChatGPT
-Brain
-Index
-Projects
-Sessions
+- ChatGPT
+- Brain
+- Index
+- Projects
+- Sessions
 
 Inside ChatGPT create:
 
-export
-normalized
+- export
+- normalized
 
-STOP HERE. Do nothing else.
+Do nothing else in here.
 
 ------------------------------------------------------------
 
