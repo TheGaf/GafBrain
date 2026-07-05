@@ -10,13 +10,14 @@ If you can create folders and run one terminal command, you can use this system.
 
 WHAT THIS IS
 
-GafBrain Kit connects three things:
+GafBrain Kit connects two things:
 
 1. ChatGPT (reasoning)
 2. Google Drive (storage)
-3. Compiler (organization system)
 
-Together they create persistent memory for AI.
+A third component called the Compiler organizes the data stored in Google Drive so ChatGPT can use it as structured memory.
+
+Together, this creates persistent memory for ChatGPT.
 
 ------------------------------------------------------------
 
@@ -44,8 +45,6 @@ STEP 2 - CREATE FOLDERS INSIDE GOOGLE DRIVE
 Inside GafBrain, create:
 
 ChatGPT
-Claude
-Gemini
 Brain
 Index
 Projects
@@ -106,10 +105,9 @@ The compiler reads your Google Drive data and builds structured memory.
 
 It processes:
 
-- conversations
+- ChatGPT exports
 - notes
-- exports
-- text files
+- text files stored in Google Drive
 
 It outputs structured memory into:
 
@@ -148,10 +146,10 @@ ChatGPT uses Google Drive to retrieve your memory.
 
 IMPORTANT RULES
 
-- Do not store personal data in GitHub
-- Google Drive is your memory
-- ChatGPT is your reasoning system
+- Google Drive is the only storage system
+- ChatGPT is the only reasoning system
 - The compiler organizes everything
+- Do not store personal data in GitHub
 
 ------------------------------------------------------------
 
@@ -159,10 +157,10 @@ RESULT
 
 You get:
 
-- persistent AI memory
+- persistent memory for ChatGPT
 - structured history of your conversations
 - cross-session continuity
-- searchable personal knowledge system
+- searchable knowledge system
 
 ------------------------------------------------------------
 
