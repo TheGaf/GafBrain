@@ -165,4 +165,4 @@ RULES (IMPORTANT)
 
 DONE
 
-If you followed steps correctly, the system is working.
+If you followed the steps correctly, the system is hopefully working.
