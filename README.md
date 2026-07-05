@@ -146,7 +146,6 @@ ChatGPT uses Google Drive to retrieve your memory.
 
 IMPORTANT RULES
 
-- Google Drive + ChatGPT is the only system tested. 
 - The compiler organizes everything
 - Do not store personal data in GitHub
 
