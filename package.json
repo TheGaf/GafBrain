@@ -1,0 +1,9 @@
+{
+  "name": "gafbrain-kit",
+  "version": "1.0.0",
+  "description": "Memory indexing engine for AI + Google Drive",
+  "type": "module",
+  "scripts": {
+    "compile": "node app/Compiler/compile-chatgpt.js"
+  }
+}
