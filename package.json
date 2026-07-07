@@ -1,9 +1,26 @@
 {
-  "name": "gafbrain-kit",
-  "version": "1.0.0",
-  "description": "Memory indexing engine for AI + Google Drive",
+  "name": "gafbrain",
+  "version": "3.0.0",
+  "description": "Personal knowledge compiler for AI. Compile your accumulated knowledge into a private, portable Brain.",
   "type": "module",
   "scripts": {
-    "compile": "node app/Compiler/compile-chatgpt.js"
-  }
+    "init": "node app/Compiler/init-archive.js",
+    "compile:chatgpt": "node app/Compiler/compile-chatgpt.js",
+    "master-index": "node app/Compiler/master-index.js",
+    "summary": "node app/Compiler/summary.js",
+    "search": "node app/Compiler/search.js",
+    "recall": "node app/Compiler/recall.js",
+    "context": "node app/Compiler/context-pack.js",
+    "brief": "node app/Compiler/brief.js",
+    "ask": "node app/Compiler/ask.js",
+    "timeline": "node app/Compiler/timeline.js",
+    "history": "node app/Compiler/history.js",
+    "projects": "node app/Compiler/project-index.js",
+    "session:log": "node app/Compiler/session-log.js",
+    "brain:status": "node app/Compiler/brain-status.js",
+    "all": "npm run init && npm run compile:chatgpt && npm run master-index && npm run summary",
+    "build": "npm run all && npm run doctor",
+    "doctor": "node app/Compiler/doctor.js"
+  },
+  "dependencies": {}
 }

@@ -1,168 +1,418 @@
-GafBrain Kit
+# GafBrain 3.0
 
-INSTALL GUIDE (READ THIS FIRST)
+> **GafBrain is a personal knowledge compiler that makes your accumulated knowledge available to any AI you choose—without transferring ownership of your data.**
 
-This is a 5-minute setup if you follow steps exactly.
+Compile your conversations and personal data into a private Brain that ChatGPT, Claude, Gemini, and future AI assistants can search and reason over.
 
-------------------------------------------------------------
+Your original files stay where you want them.
 
-WHAT THIS IS
+Your AI can change.
 
-GafBrain turns:
+Your Brain stays yours.
 
-Google Drive + ChatGPT + a local compiler
+---
 
-into a persistent memory system.
+# Current Status
 
-ChatGPT = reads memory
-Google Drive = stores memory
-Compiler = organizes memory
+**Version:** 3.0 Alpha
 
-------------------------------------------------------------
+### Supported
 
-REQUIREMENTS
+✅ ChatGPT Archives
 
-You need:
+### In Progress
 
-- Google Drive account
-- ChatGPT account
-- Computer (Mac or PC)
-- Terminal access
-- Node.js installed
+- Reddit
+- Claude
+- Google Drive
 
-If Node.js is not installed:
-https://nodejs.org
+### Planned
 
-------------------------------------------------------------
+- Gmail
+- Photos
+- GitHub
+- LinkedIn
+- Documents
+- Presentations
+- Code
 
-STEP 1 — CREATE GOOGLE DRIVE FOLDER
+---
 
-Open:
+# In 30 Seconds
 
-https://drive.google.com
+Most AI assistants only know what you tell them today.
 
-Create a folder named:
-
-GafBrain
-
-Do not rename it.
-
-------------------------------------------------------------
-
-STEP 2 — CREATE FOLDER STRUCTURE
-
-Inside GafBrain, create:
+Meanwhile your knowledge is scattered across:
 
 - ChatGPT
-- Brain
-- Index
-- Projects
-- Sessions
+- Claude
+- Google Drive
+- Reddit
+- Gmail
+- GitHub
+- Photos
 
-Inside ChatGPT, create:
+GafBrain compiles those sources into one portable Brain.
 
-- export
-- normalized
+```
+Your Data
 
-Do not add anything else.
+↓
 
-------------------------------------------------------------
+GafBrain Compiler
 
-STEP 3 — EXPORT CHATGPT DATA
+↓
 
-In ChatGPT:
+Your Brain
 
-Settings → Data Controls → Export Data
+↓
 
-Download export file.
+ChatGPT
+Claude
+Gemini
+Future AI
+```
 
-Unzip it.
+---
 
-Move exported files into:
+# Current Features
 
-GafBrain/ChatGPT/export
+- ✅ ChatGPT archive compiler
+- ✅ Conversation timeline
+- ✅ Exact quote search
+- ✅ Searchable conversation index
+- ✅ AI upload bundle
+- ✅ Local compiler
+- ✅ Google Drive compatible
+- ✅ Snapshot archive support
 
-------------------------------------------------------------
+---
 
-STEP 4 — CONNECT CHATGPT TO GOOGLE DRIVE
+# Quick Start
 
-In ChatGPT:
+## 1. Install Node.js
 
-Settings → Connectors → Google Drive
+https://nodejs.org
 
-Connect your account.
+---
 
-Grant access to your GafBrain folder.
+## 2. Clone or download GafBrain
 
-------------------------------------------------------------
+```
+git clone ...
+```
 
-STEP 5 — DOWNLOAD THIS PROJECT
+or download the ZIP.
 
-Download the GafBrain Kit ZIP.
+---
 
-Unzip it.
+## 3. Install
 
-Open Terminal.
+```bash
+npm install
+```
 
-Go into the folder:
+---
 
-cd ~/Desktop/GafBrain-Kit
+## 4. Initialize
 
-------------------------------------------------------------
+```bash
+npm run init
+```
 
-STEP 6 — RUN THE COMPILER
+This creates your private workspace.
 
-Run exactly:
+---
 
-node app/Compiler/compile-chatgpt.js
+## 5. Add your ChatGPT export
 
-Wait for it to complete.
+Copy your exported conversation files into:
 
-------------------------------------------------------------
+```
+workspace/
+    Raw/
+        AI/
+            ChatGPT/
+```
 
-WHAT THE COMPILER DOES
+Supported formats:
 
-The compiler:
+```
+conversations.json
+```
 
-1. Reads ChatGPT exports from Google Drive
-2. Cleans and normalizes text
-3. Extracts:
-   - decisions
-   - topics
-   - people
-   - projects
-   - timeline events
-4. Writes structured memory into:
+or
 
-GafBrain/Brain
+```
+conversations-000.json
+conversations-001.json
+...
+```
 
-5. Builds searchable index in:
+---
 
-GafBrain/Index
+## 6. Build
 
-------------------------------------------------------------
+```bash
+npm run build
+```
 
-HOW YOU USE IT
+This will:
 
-After setup, you only interact with ChatGPT:
+- discover exports
+- normalize conversations
+- build search indexes
+- generate timelines
+- create the AI upload bundle
 
-- What did I decide about this?
-- What have I said about this before?
-- Summarize my past conversations
-- Show my history with X
+---
 
-ChatGPT reads your Google Drive and reconstructs memory.
+## 7. Verify
 
-------------------------------------------------------------
+```bash
+npm run doctor
+```
 
-RULES (IMPORTANT)
+Expected:
 
-- The compiler organizes everything
-- Do not store personal data in GitHub
-- Do not modify folder structure
+```
+✓ ChatGPT export found
 
-------------------------------------------------------------
+✓ Brain created
 
-DONE
+✓ Search index
 
-If you followed the steps correctly, the system is hopefully working.
+✓ Timeline
+
+Ready for AI.
+```
+
+---
+
+# Connect Your AI
+
+Give your AI access to:
+
+```
+workspace/Brain/
+```
+
+Start with:
+
+```
+START HERE - GafBrain.md
+
+LOOKUP_GUIDE.md
+```
+
+Suggested prompt:
+
+```
+Read START HERE - GafBrain.md and LOOKUP_GUIDE.md.
+
+Use my GafBrain Brain as the source of truth.
+
+Search structured JSON before Markdown.
+
+If evidence is missing, say so instead of guessing.
+```
+
+---
+
+# Example Questions
+
+- What was my fifth conversation?
+- When did I first mention GafBrain?
+- When did I rename Mybrary?
+- Show every April 2026 conversation.
+- What projects have I worked on most?
+- What themes keep appearing?
+
+---
+
+# Updating Your Brain
+
+When you receive a new export:
+
+1. Move the previous export into:
+
+```
+workspace/Archive/
+```
+
+2. Copy the new export into:
+
+```
+workspace/Raw/
+```
+
+3. Rebuild:
+
+```bash
+npm run build
+```
+
+Done.
+
+---
+
+# Commands
+
+Initialize
+
+```bash
+npm run init
+```
+
+Build
+
+```bash
+npm run build
+```
+
+Verify
+
+```bash
+npm run doctor
+```
+
+Search
+
+```bash
+npm run search
+```
+
+Recall
+
+```bash
+npm run recall -- keyword
+```
+
+Status
+
+```bash
+npm run brain:status
+```
+
+---
+
+# Folder Structure
+
+```
+GafBrain/
+
+app/
+workspace/
+
+README.md
+package.json
+.gitignore
+```
+
+### app/
+
+The public framework.
+
+Replace this folder whenever a new version of GafBrain is released.
+
+---
+
+### workspace/
+
+Your private knowledge.
+
+Never commit this folder to GitHub.
+
+```
+workspace/
+
+Raw/
+Brain/
+Archive/
+Reports/
+```
+
+---
+
+# Collections
+
+GafBrain is organized around collections.
+
+Current:
+
+```
+AI
+    ChatGPT
+```
+
+Planned:
+
+```
+AI
+    Claude
+    Gemini
+
+Social
+    Reddit
+    LinkedIn
+
+Email
+    Gmail
+
+Files
+    Google Drive
+
+Photos
+
+Code
+
+Documents
+
+Presentations
+```
+
+Each collection has its own compiler.
+
+Every compiler contributes to the same Brain.
+
+---
+
+# Updating GafBrain
+
+Updating GafBrain should never affect your personal data.
+
+Replace:
+
+```
+app/
+```
+
+Leave:
+
+```
+workspace/
+```
+
+Your Brain will continue to work with the new compiler.
+
+---
+
+# Philosophy
+
+```
+Raw is sacred.
+
+Brain is reproducible.
+
+Framework is replaceable.
+
+Your knowledge is permanent.
+```
+
+---
+
+# License
+
+MIT
+
+Built by The Gaf.

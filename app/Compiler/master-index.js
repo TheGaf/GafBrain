@@ -1,6 +1,16 @@
 import fs from "fs";
+import path from "path";
+import { paths, ensureDir } from "./helpers.js";
 
-const idx = JSON.parse(fs.readFileSync("../data/Index/search-index.json", "utf8"));
+const p = paths();
+const searchIndexPath = path.join(p.brainDir, "search-index.json");
+
+if (!fs.existsSync(searchIndexPath)) {
+  console.error("No Brain/search-index.json found. Run npm run compile:chatgpt first.");
+  process.exit(1);
+}
+
+const idx = JSON.parse(fs.readFileSync(searchIndexPath, "utf8"));
 const records = idx.records || [];
 
 const clean = (s, n = 900) =>
@@ -24,16 +34,17 @@ let out = `# GAFBRAIN_INDEX
 
 This is the master searchable index for GafBrain.
 
-AI assistants should read this file first when answering questions about past conversations, prior decisions, project history, preferences, domains, people, tools, or how thinking changed over time.
+AI assistants should read this file after \`LOOKUP_GUIDE.md\` when answering questions about past conversations, prior decisions, project history, preferences, domains, people, tools, or how thinking changed over time.
 
 ## How to use this Brain
 
-1. Use this file as the high-level map.
-2. Use data/Index/search-index.json for topic search.
-3. Use data/Index/verbatims.json for exact dates, first mentions, original wording, and quotes.
-4. Use data/ChatGPT/normalized/ for full conversation context.
-5. Separate archive evidence from synthesis.
-6. If evidence is missing, say so.
+1. Use \`LOOKUP_GUIDE.md\` as the routing guide.
+2. Use \`timeline.json\`, \`timeline-YYYY.json\`, \`months/YYYY-MM.json\`, and \`monthly-stats.json\` for chronology.
+3. Use \`search-index.json\` for topic search.
+4. Use \`verbatims.json\` or \`verbatims/YYYY/YYYY-MM.json\` for exact dates, first mentions, original wording, and quotes.
+5. Use \`ChatGPT/normalized/\` for full conversation context.
+6. Separate archive evidence from synthesis.
+7. If evidence is missing, say so.
 
 Do not rely only on summaries for exact dates, quotes, first mentions, who said what, or timeline order.
 
@@ -48,6 +59,7 @@ for (const r of records.slice().reverse()) {
   const hay = `${r.title}\n${r.first_message}\n${r.text}`;
   out += `### ${r.title || "Untitled"}
 
+Ordinal: ${r.ordinal || "unknown"}
 Date: ${r.created || r.updated || "unknown"}
 Updated: ${r.updated || "unknown"}
 Path: ${r.path}
@@ -66,7 +78,6 @@ ${clean(r.text, 1500)}
 `;
 }
 
-fs.writeFileSync("../GAFBRAIN_INDEX.md", out);
-fs.writeFileSync("../data/Brain/GAFBRAIN_INDEX.md", out);
-console.log("Wrote ../GAFBRAIN_INDEX.md");
-console.log("Wrote data/Brain/GAFBRAIN_INDEX.md");
+ensureDir(p.brainDir);
+fs.writeFileSync(path.join(p.brainDir, "GAFBRAIN_INDEX.md"), out, "utf8");
+console.log(`Wrote ${path.relative(p.root, path.join(p.brainDir, "GAFBRAIN_INDEX.md"))}`);

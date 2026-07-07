@@ -1,5 +1,13 @@
-data/
-GAFBRAIN_INDEX.md
-START HERE - GafBrain.md
-node_modules/
+# GafBrain private workspace
+workspace/
+
+# Local/private files
+.env
 .DS_Store
+node_modules/
+npm-debug.log*
+
+# Backups
+*_BACKUP*
+*_backup*
+*.zip
