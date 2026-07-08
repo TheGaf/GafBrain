@@ -5,11 +5,31 @@ import { paths, ensureDir, writeJson, walkFiles } from "./helpers.js";
 const p = paths();
 const generatedAt = new Date().toISOString();
 
-const filesRoot = path.join(p.rawDir, "Files");
+const defaultFilesRoot = path.join(p.rawDir, "Files");
 const outDir = path.join(p.brainDir, "Files");
+const configPath = path.join(p.root, "config", "sources.json");
 
-ensureDir(filesRoot);
+ensureDir(defaultFilesRoot);
 ensureDir(outDir);
+
+function loadFileSources() {
+  if (!fs.existsSync(configPath)) {
+    return [{ name: "Workspace Files", path: defaultFilesRoot }];
+  }
+
+  const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const sources = Array.isArray(cfg.files) ? cfg.files : [];
+
+  return sources
+    .filter(src => src && src.path)
+    .map(src => ({
+      name: src.name || path.basename(src.path),
+      path: path.resolve(src.path),
+      exclude: src.exclude || []
+    }));
+}
+
+const fileSources = loadFileSources();
 
 function kindFor(file) {
   const ext = path.extname(file).toLowerCase().replace(".", "");
@@ -152,16 +172,49 @@ function parseCsvProfile(file) {
   };
 }
 
-const files = walkFiles(filesRoot).filter(f => !path.basename(f).startsWith("."));
+const files = [];
 
-const records = files.map(file => {
+for (const source of fileSources) {
+  if (!fs.existsSync(source.path)) {
+    console.warn(`Skipped missing source: ${source.name} — ${source.path}`);
+    continue;
+  }
+
+  for (const file of walkFiles(source.path)) {
+    if (path.basename(file).startsWith(".")) continue;
+    files.push({ file, source });
+  }
+}
+
+
+function shouldExclude(file, source) {
+  const rel = path.relative(source.path, file);
+  const rules = source.exclude || [];
+
+  for (const rule of rules) {
+    if (!rule.includes("*") && rel.split(path.sep).includes(rule))
+      return true;
+
+    if (rule.startsWith("*.") &&
+        file.toLowerCase().endsWith(rule.slice(1).toLowerCase()))
+      return true;
+  }
+
+  return false;
+}
+
+const records = files.filter(({file, source}) => !shouldExclude(file, source)).map(({ file, source }) => {
   const stat = fs.statSync(file);
   const rel = path.relative(p.root, file);
+  const sourceRel = path.relative(source.path, file);
   const kind = kindFor(file);
 
   const rec = {
     id: Buffer.from(rel).toString("base64url"),
     source: "Files",
+    source_name: source.name,
+    source_root: source.path,
+    source_relative_path: sourceRel,
     kind,
     name: path.basename(file),
     extension: path.extname(file).toLowerCase(),
@@ -193,7 +246,7 @@ const recent = [...records].sort((a,b) => String(b.modified).localeCompare(Strin
 
 writeJson(path.join(outDir, "files-catalog.json"), {
   generated_at: generatedAt,
-  source_root: path.relative(p.root, filesRoot),
+  sources: fileSources.map(s => ({ name: s.name, path: s.path })),
   file_count: records.length,
   records
 });
@@ -211,7 +264,8 @@ writeJson(path.join(outDir, "files-recent.json"), {
 });
 
 console.log(`# GafBrain Files Catalog`);
-console.log(`Scanned: ${path.relative(p.root, filesRoot)}`);
+console.log(`Scanned sources:`);
+for (const source of fileSources) console.log(`- ${source.name}: ${source.path}`);
 console.log(`Files: ${records.length}`);
 console.log(`Kinds: ${Object.entries(byKind).map(([k,v]) => `${k}:${v.length}`).join(", ") || "none"}`);
 console.log(`Output: ${path.relative(p.root, outDir)}`);
