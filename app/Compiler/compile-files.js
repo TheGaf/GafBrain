@@ -236,6 +236,77 @@ const records = files.filter(({file, source}) => !shouldExclude(file, source)).m
   return rec;
 });
 
+
+function tokenizeFileRecord(rec) {
+  const text = [
+    rec.name,
+    rec.folder,
+    rec.source_relative_path
+  ].join(" ").toLowerCase();
+
+  return [...new Set(
+    text
+      .replace(/[^a-z0-9]+/g, " ")
+      .split(/\s+/)
+      .filter(w => w.length >= 3)
+      .filter(w => ![
+        "the","and","for","with","from","this","that","file","files",
+        "image","images","copy","final","draft","new","old","src","app"
+      ].includes(w))
+  )];
+}
+
+function buildFileSummary(records) {
+  const topics = {};
+  const byKind = {};
+  const bySource = {};
+  const recent = [...records]
+    .sort((a,b) => String(b.modified).localeCompare(String(a.modified)))
+    .slice(0, 100);
+
+  for (const rec of records) {
+    if (!byKind[rec.kind]) byKind[rec.kind] = [];
+    byKind[rec.kind].push(rec);
+
+    if (!bySource[rec.source_name]) bySource[rec.source_name] = [];
+    bySource[rec.source_name].push(rec);
+
+    for (const token of tokenizeFileRecord(rec)) {
+      if (!topics[token]) topics[token] = [];
+      if (topics[token].length < 100) {
+        topics[token].push({
+          name: rec.name,
+          kind: rec.kind,
+          path: rec.path,
+          source_relative_path: rec.source_relative_path,
+          modified: rec.modified,
+          size_bytes: rec.size_bytes
+        });
+      }
+    }
+  }
+
+  return {
+    generated_at: generatedAt,
+    file_count: records.length,
+    kind_counts: Object.fromEntries(
+      Object.entries(byKind).map(([k,v]) => [k, v.length]).sort((a,b) => b[1]-a[1])
+    ),
+    source_counts: Object.fromEntries(
+      Object.entries(bySource).map(([k,v]) => [k, v.length]).sort((a,b) => b[1]-a[1])
+    ),
+    recent_files: recent.map(rec => ({
+      name: rec.name,
+      kind: rec.kind,
+      path: rec.path,
+      source_relative_path: rec.source_relative_path,
+      modified: rec.modified,
+      size_bytes: rec.size_bytes
+    })),
+    topics
+  };
+}
+
 const byKind = {};
 for (const rec of records) {
   if (!byKind[rec.kind]) byKind[rec.kind] = [];
@@ -262,6 +333,8 @@ writeJson(path.join(outDir, "files-recent.json"), {
   file_count: recent.length,
   records: recent
 });
+
+writeJson(path.join(outDir, "files-summary.json"), buildFileSummary(records));
 
 console.log(`# GafBrain Files Catalog`);
 console.log(`Scanned sources:`);

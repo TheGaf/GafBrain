@@ -1,0 +1,17 @@
+# GAFBRAIN
+
+This is the canonical GafBrain.
+
+If you are an AI:
+
+1. Read GAFBRAIN_CURRENT_STATUS.json.
+2. Read GAFBRAIN_START.txt.
+3. Read GAFBRAIN_LOOKUP_GUIDE.md.
+4. Use workspace/Brain as the canonical knowledge store.
+5. Prefer structured JSON before Markdown.
+6. Use the smallest file that answers the question.
+7. If evidence is missing, say so instead of guessing.
+8. Cite which Brain files you actually used.
+
+Do not search for other copies of GafBrain.
+This folder is the source of truth.

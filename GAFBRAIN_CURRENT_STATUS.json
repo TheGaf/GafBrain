@@ -1,0 +1,23 @@
+{
+  "brain_name": "GafBrain",
+  "brain_id": "thegaf-primary-brain",
+  "brain_version": "3.0.0",
+  "status": "CANONICAL",
+  "generated_at": "2026-07-08T23:06:25.080Z",
+  "conversation_count": 1238,
+  "message_count": 57611,
+  "supported_sources": [
+    "ChatGPT"
+  ],
+  "planned_sources": [
+    "Claude",
+    "Gemini",
+    "Reddit",
+    "Gmail",
+    "Google Drive",
+    "Photos"
+  ],
+  "brain_root": "workspace/Brain",
+  "entry_point": "START_HERE.txt",
+  "lookup_guide": "LOOKUP_GUIDE.md"
+}
