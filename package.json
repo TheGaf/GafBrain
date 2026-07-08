@@ -1,6 +1,6 @@
 {
   "name": "gafbrain",
-  "version": "3.0.0",
+  "version": "3.2.0-alpha",
   "description": "Personal knowledge compiler for AI. Compile your accumulated knowledge into a private, portable Brain.",
   "type": "module",
   "scripts": {
@@ -20,7 +20,9 @@
     "brain:status": "node app/Compiler/brain-status.js",
     "all": "npm run init && npm run compile:chatgpt && npm run master-index && npm run summary",
     "build": "npm run all && npm run doctor",
-    "doctor": "node app/Compiler/doctor.js"
+    "doctor": "node app/Compiler/doctor.js",
+    "catalog:files": "node app/Compiler/compile-files.js",
+    "build:files": "npm run catalog:files"
   },
   "dependencies": {}
 }
