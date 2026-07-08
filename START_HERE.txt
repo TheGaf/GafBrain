@@ -1,0 +1,15 @@
+# GafBrain
+
+This is the canonical GafBrain.
+
+Read this file first.
+
+Next:
+
+1. Read CURRENT_STATUS.json.
+2. Read LOOKUP_GUIDE.md.
+3. Follow LOOKUP_GUIDE.md for routing.
+4. Use files in workspace/Brain as the source of truth.
+5. Prefer structured JSON before Markdown.
+6. If evidence is missing, say so instead of guessing.
+7. Cite which Brain files you used.
