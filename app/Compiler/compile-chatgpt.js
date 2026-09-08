@@ -14,6 +14,7 @@ import {
   installTemplates
 } from "./helpers.js";
 
+const FRAMEWORK_VERSION = "3.2.0-alpha";
 const p = paths();
 const generatedAt = new Date().toISOString();
 
@@ -43,7 +44,6 @@ if (!loaded.files.length) {
 }
 
 const conversations = loaded.conversations;
-
 if (!conversations.length) {
   console.error("Conversation files were found, but no conversations could be parsed.");
   process.exit(1);
@@ -178,31 +178,24 @@ const timelinePayload = {
   records: timeline
 };
 
-// Canonical AI-facing files live in Brain.
 writeJson(path.join(p.brainDir, "search-index.json"), searchIndexPayload);
 writeJson(path.join(p.brainDir, "verbatims.json"), verbatimsPayload);
 writeJson(path.join(p.brainDir, "timeline.json"), timelinePayload);
 fs.writeFileSync(path.join(p.brainDir, "CONVERSATION_TIMELINE.md"), timelineMd, "utf8");
 
-// Split search index into digestible files for AI connectors.
 const searchDir = path.join(p.brainDir, "Search");
 emptyDirectory(searchDir);
-
 const searchByYear = {};
 const searchByMonth = {};
-
 for (const rec of index) {
   const date = (rec.created || rec.updated || "").slice(0, 10);
   const year = date ? date.slice(0, 4) : "unknown";
   const monthKey = date ? date.slice(0, 7) : "unknown";
-
   if (!searchByYear[year]) searchByYear[year] = [];
-  searchByYear[year].push(rec);
-
   if (!searchByMonth[monthKey]) searchByMonth[monthKey] = [];
+  searchByYear[year].push(rec);
   searchByMonth[monthKey].push(rec);
 }
-
 for (const [year, records] of Object.entries(searchByYear)) {
   writeJson(path.join(searchDir, `search-${year}.json`), {
     generated_at: generatedAt,
@@ -212,10 +205,8 @@ for (const [year, records] of Object.entries(searchByYear)) {
     records
   });
 }
-
 const searchMonthsDir = path.join(searchDir, "months");
 ensureDir(searchMonthsDir);
-
 for (const [month, records] of Object.entries(searchByMonth)) {
   writeJson(path.join(searchMonthsDir, `search-${month}.json`), {
     generated_at: generatedAt,
@@ -226,10 +217,8 @@ for (const [month, records] of Object.entries(searchByMonth)) {
   });
 }
 
-// Split verbatims into digestible files for exact quote lookup.
 const verbatimSearchDir = path.join(p.brainDir, "VerbatimsByMonth");
 emptyDirectory(verbatimSearchDir);
-
 const verbatimSplitByMonth = {};
 for (const v of verbatims) {
   const date = (v.created || v.updated || "").slice(0, 10);
@@ -237,7 +226,6 @@ for (const v of verbatims) {
   if (!verbatimSplitByMonth[monthKey]) verbatimSplitByMonth[monthKey] = [];
   verbatimSplitByMonth[monthKey].push(v);
 }
-
 for (const [month, records] of Object.entries(verbatimSplitByMonth)) {
   writeJson(path.join(verbatimSearchDir, `verbatims-${month}.json`), {
     generated_at: generatedAt,
@@ -248,11 +236,8 @@ for (const [month, records] of Object.entries(verbatimSplitByMonth)) {
   });
 }
 
-
-// Split timeline into yearly and monthly files for AI retrieval.
 const timelineByYear = {};
 const timelineByMonth = {};
-
 for (const rec of timeline) {
   if (rec.year) {
     if (!timelineByYear[rec.year]) timelineByYear[rec.year] = [];
@@ -267,9 +252,7 @@ for (const rec of timeline) {
 
 const monthsDir = path.join(p.brainDir, "months");
 ensureDir(monthsDir);
-
 const monthlyStats = {};
-
 for (const [year, records] of Object.entries(timelineByYear)) {
   writeJson(path.join(p.brainDir, `timeline-${year}.json`), {
     generated_at: generatedAt,
@@ -280,7 +263,6 @@ for (const [year, records] of Object.entries(timelineByYear)) {
     records
   });
 }
-
 for (const [key, records] of Object.entries(timelineByMonth)) {
   monthlyStats[key] = records.length;
   writeJson(path.join(monthsDir, `${key}.json`), {
@@ -292,13 +274,11 @@ for (const [key, records] of Object.entries(timelineByMonth)) {
     records
   });
 }
-
 writeJson(path.join(p.brainDir, "monthly-stats.json"), {
   generated_at: generatedAt,
   monthly_counts: monthlyStats
 });
 
-// Split verbatims by month for exact-quote retrieval without huge-file scanning.
 const verbatimsByMonth = {};
 for (const rec of verbatims) {
   const timestamp = rec.created || rec.updated || "";
@@ -306,10 +286,8 @@ for (const rec of verbatims) {
   if (!verbatimsByMonth[key]) verbatimsByMonth[key] = [];
   verbatimsByMonth[key].push(rec);
 }
-
 const verbatimsDir = path.join(p.brainDir, "verbatims");
 ensureDir(verbatimsDir);
-
 for (const [key, records] of Object.entries(verbatimsByMonth)) {
   const year = key === "unknown" ? "unknown" : key.slice(0, 4);
   const yearDir = path.join(verbatimsDir, year);
@@ -324,13 +302,14 @@ for (const [key, records] of Object.entries(verbatimsByMonth)) {
 
 const manifest = {
   name: "GafBrain",
-  version: "3.0.0",
+  framework_version: FRAMEWORK_VERSION,
   generated_at: generatedAt,
   raw_root: path.relative(p.root, p.rawDir),
   canonical_output: path.relative(p.root, p.brainDir),
   source_files: loaded.files.map(f => path.relative(p.root, f)),
   conversation_count: index.length,
   message_count: totalMessageCount,
+  supported_sources: ["ChatGPT"],
   outputs: {
     lookup_guide: "workspace/Brain/LOOKUP_GUIDE.md",
     bootstrap: "workspace/Brain/START HERE - GafBrain.md",
@@ -346,15 +325,22 @@ const manifest = {
     monthly_stats: "workspace/Brain/monthly-stats.json",
     verbatims_by_month_dir: "workspace/Brain/verbatims/",
     normalized_markdown_dir: "workspace/Brain/ChatGPT/normalized/"
-  },
-  tested_with: [
-    "ChatGPT Google Drive connector",
-    "Claude Google Drive connector",
-    "Gemini Google Workspace / Google Drive"
-  ]
+  }
 };
-
 writeJson(path.join(p.brainDir, "MANIFEST.json"), manifest);
+
+const currentStatus = {
+  brain_name: "GafBrain",
+  framework_version: FRAMEWORK_VERSION,
+  generated_at: generatedAt,
+  conversation_count: index.length,
+  message_count: totalMessageCount,
+  supported_sources: ["ChatGPT"],
+  brain_root: "workspace/Brain",
+  entry_point: "START HERE - GafBrain.md",
+  lookup_guide: "LOOKUP_GUIDE.md"
+};
+writeJson(path.join(p.brainDir, "CURRENT_STATUS.json"), currentStatus);
 
 // Disposable AI upload bundle: small, high-value files only.
 const aiUploadDir = path.join(p.brainDir, "AI_UPLOAD");
@@ -367,6 +353,7 @@ for (const rel of [
   "START HERE - GafBrain.md",
   "LOOKUP_GUIDE.md",
   "MANIFEST.json",
+  "CURRENT_STATUS.json",
   "GAFBRAIN_INDEX.md",
   "monthly-stats.json",
   "timeline.json"
@@ -380,36 +367,4 @@ console.log(`Markdown: ${path.relative(p.root, p.normalizedDir)}`);
 console.log(`Brain: ${path.relative(p.root, p.brainDir)}`);
 console.log(`Timeline by year: ${Object.keys(timelineByYear).join(", ") || "none"}`);
 console.log(`Timeline by month: ${Object.keys(timelineByMonth).length} file(s)`);
-
-// Publish root-level GafBrain interface for AI connectors.
-const currentStatus = {
-  brain_name: "GafBrain",
-  brain_id: "thegaf-primary-brain",
-  brain_version: "3.0.0",
-  status: "CANONICAL",
-  generated_at: generatedAt,
-  conversation_count: index.length,
-  message_count: totalMessageCount,
-  supported_sources: ["ChatGPT"],
-  planned_sources: ["Claude", "Gemini", "Reddit", "Gmail", "Google Drive", "Photos"],
-  brain_root: "workspace/Brain",
-  entry_point: "START_HERE.txt",
-  lookup_guide: "LOOKUP_GUIDE.md"
-};
-
-writeJson(path.join(p.brainDir, "CURRENT_STATUS.json"), currentStatus);
-writeJson(path.join(p.root, "CURRENT_STATUS.json"), currentStatus);
-
-fs.copyFileSync(
-  path.join(p.brainDir, "LOOKUP_GUIDE.md"),
-  path.join(p.root, "LOOKUP_GUIDE.md")
-);
-
-fs.copyFileSync(
-  path.join(p.brainDir, "START HERE - GafBrain.md"),
-  path.join(p.root, "START_HERE.txt")
-);
-
-console.log(`Published interface: CURRENT_STATUS.json, START_HERE.txt, LOOKUP_GUIDE.md`);
-
 console.log(`AI upload bundle: ${path.relative(p.root, aiUploadDir)}`);
