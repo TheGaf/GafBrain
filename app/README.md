@@ -1,44 +1,45 @@
-# GafBrain App v2.0
+# GafBrain App
 
-Persistent Memory compiler for AI-native Personal Archives.
+The replaceable compiler/framework code for GafBrain **3.2.0-alpha**.
 
-## Run from repository root
+Run commands from the repository root using the root `package.json`:
 
 ```bash
 npm run init
-npm run all
+npm run build
+npm run doctor
 npm run recall -- "search terms"
 npm run context -- "question or topic"
 npm run brief -- "topic"
-npm run ask -- "when did we first discuss X"
 ```
 
 ## Canonical structure
 
 ```text
-Raw/       immutable export files
-Brain/     generated AI-facing memory
-app/       replaceable framework code
+workspace/Raw/                 immutable user-owned exports
+workspace/Brain/               generated AI-facing memory
+workspace/Archive/             older exports
+app/                           replaceable framework code + templates
+config/sources.example.json    safe example for optional file cataloging
 ```
+
+The compiler never needs to publish personal Brain state into the tracked repository root.
 
 ## Generated retrieval files
 
+Typical outputs include:
+
 ```text
-Brain/MANIFEST.json
-Brain/GAFBRAIN_INDEX.md
-Brain/LOOKUP_GUIDE.md
-Brain/search-index.json
-Brain/verbatims.json
-Brain/timeline.json
-Brain/timeline-YYYY.json
-Brain/months/YYYY-MM.json
-Brain/monthly-stats.json
-Brain/verbatims/YYYY/YYYY-MM.json
-Brain/AI_UPLOAD/
+workspace/Brain/MANIFEST.json
+workspace/Brain/CURRENT_STATUS.json
+workspace/Brain/GAFBRAIN_INDEX.md
+workspace/Brain/LOOKUP_GUIDE.md
+workspace/Brain/search-index.json
+workspace/Brain/verbatims.json
+workspace/Brain/timeline.json
+workspace/Brain/timeline-YYYY.json
+workspace/Brain/months/YYYY-MM.json
+workspace/Brain/AI_UPLOAD/
 ```
 
-## What retrieval means
-
-GafBrain does not load every conversation into an AI.
-
-It compiles a Personal Archive into small, AI-readable lookup files so the assistant can retrieve relevant history and reason over it.
+GafBrain does not require loading every conversation into an AI at once. It builds smaller lookup files so relevant history can be found first and full conversation context opened only when needed.
