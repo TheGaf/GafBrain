@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { paths, ensureDir, writeJson, walkFiles } from "./helpers.js";
 
 const p = paths();
@@ -14,7 +15,12 @@ ensureDir(outDir);
 
 function loadFileSources() {
   if (!fs.existsSync(configPath)) {
-    return [{ name: "Workspace Files", path: defaultFilesRoot }];
+    return [{
+      name: "Workspace Files",
+      path: defaultFilesRoot,
+      exclude: [],
+      content_sampling: false
+    }];
   }
 
   const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -25,7 +31,8 @@ function loadFileSources() {
     .map(src => ({
       name: src.name || path.basename(src.path),
       path: path.resolve(src.path),
-      exclude: src.exclude || []
+      exclude: src.exclude || [],
+      content_sampling: src.content_sampling === true
     }));
 }
 
@@ -33,10 +40,10 @@ const fileSources = loadFileSources();
 
 function kindFor(file) {
   const ext = path.extname(file).toLowerCase().replace(".", "");
-  if (["csv"].includes(ext)) return "csv";
-  if (["json"].includes(ext)) return "json";
+  if (ext === "csv") return "csv";
+  if (ext === "json") return "json";
   if (["md", "txt"].includes(ext)) return "text";
-  if (["pdf"].includes(ext)) return "pdf";
+  if (ext === "pdf") return "pdf";
   if (["docx", "doc"].includes(ext)) return "document";
   if (["pptx", "ppt"].includes(ext)) return "presentation";
   if (["xlsx", "xls"].includes(ext)) return "spreadsheet";
@@ -60,32 +67,26 @@ function parseCsvRows(raw, maxRows = 60) {
       i++;
       continue;
     }
-
     if (ch === '"') {
       inQuotes = !inQuotes;
       continue;
     }
-
     if (ch === "," && !inQuotes) {
       row.push(cur.trim());
       cur = "";
       continue;
     }
-
     if ((ch === "\n" || ch === "\r") && !inQuotes) {
       if (ch === "\r" && next === "\n") i++;
       row.push(cur.trim());
       cur = "";
-
       if (row.some(v => v !== "")) {
         rows.push(row);
         if (rows.length >= maxRows) break;
       }
-
       row = [];
       continue;
     }
-
     cur += ch;
   }
 
@@ -93,7 +94,6 @@ function parseCsvRows(raw, maxRows = 60) {
     row.push(cur.trim());
     if (row.some(v => v !== "")) rows.push(row);
   }
-
   return rows;
 }
 
@@ -105,127 +105,86 @@ function detectColumnType(values) {
   const urlCount = sample.filter(v => /^https?:\/\//i.test(v)).length;
   const emailCount = sample.filter(v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)).length;
   const numberCount = sample.filter(v => /^-?\d+(\.\d+)?$/.test(v)).length;
-  const idCount = sample.filter(v => /^[a-z]{1,6}[_-]?[a-z0-9]{3,}$/i.test(v)).length;
   const longTextCount = sample.filter(v => v.length > 120).length;
-
-  const ratio = (n) => n / sample.length;
+  const ratio = n => n / sample.length;
 
   if (ratio(urlCount) > 0.6) return "url";
   if (ratio(emailCount) > 0.6) return "email";
   if (ratio(dateCount) > 0.6) return "date";
   if (ratio(numberCount) > 0.8) return "number";
   if (ratio(longTextCount) > 0.3) return "long_text";
-  if (ratio(idCount) > 0.6) return "id";
-
   return "text";
-}
-
-function inferDatasetName(file, headers) {
-  const base = path.basename(file, path.extname(file)).toLowerCase();
-  const h = headers.join(" ").toLowerCase();
-
-  if (base.includes("reddit") || h.includes("subreddit") || h.includes("permalink")) return "reddit_export";
-  if (h.includes("from_username") || h.includes("announcement_id")) return "reddit_export";
-  if (h.includes("email") && h.includes("subject")) return "email_export";
-  if (h.includes("url") && h.includes("title")) return "link_index";
-  if (h.includes("created") || h.includes("modified")) return "file_or_activity_export";
-
-  return base || "csv_dataset";
 }
 
 function parseCsvProfile(file) {
   const raw = fs.readFileSync(file, "utf8").slice(0, 750000);
   const parsedRows = parseCsvRows(raw, 60);
   const headers = (parsedRows[0] || []).map(x => x.replace(/^"|"$/g, ""));
-
   const rows = parsedRows.slice(1, 51);
-  const sampleRecords = rows.slice(0, 5).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => { obj[h || `column_${i + 1}`] = row[i] ?? ""; });
-    return obj;
-  });
 
   const columnProfiles = headers.map((h, i) => {
     const values = rows.map(row => row[i] || "");
     return {
       name: h || `column_${i + 1}`,
       type: detectColumnType(values),
-      non_empty_sample_count: values.filter(Boolean).length,
-      examples: [...new Set(values.filter(Boolean).slice(0, 5))].slice(0, 5)
+      non_empty_sample_count: values.filter(Boolean).length
     };
   });
 
-  const types = new Set(columnProfiles.map(c => c.type));
-
   return {
-    likely_dataset: inferDatasetName(file, headers),
     column_count: headers.length,
     columns: headers.slice(0, 100),
-    column_profiles: columnProfiles.slice(0, 100),
     sampled_row_count: Math.max(0, parsedRows.length - 1),
-    contains_dates: types.has("date"),
-    contains_urls: types.has("url"),
-    contains_emails: types.has("email"),
-    contains_numbers: types.has("number"),
-    contains_long_text: types.has("long_text"),
-    sample_records: sampleRecords
+    column_profiles: columnProfiles.slice(0, 100)
   };
 }
-
-const files = [];
-
-for (const source of fileSources) {
-  if (!fs.existsSync(source.path)) {
-    console.warn(`Skipped missing source: ${source.name} — ${source.path}`);
-    continue;
-  }
-
-  for (const file of walkFiles(source.path)) {
-    if (path.basename(file).startsWith(".")) continue;
-    files.push({ file, source });
-  }
-}
-
 
 function shouldExclude(file, source) {
   const rel = path.relative(source.path, file);
   const rules = source.exclude || [];
 
   for (const rule of rules) {
-    if (!rule.includes("*") && rel.split(path.sep).includes(rule))
-      return true;
-
-    if (rule.startsWith("*.") &&
-        file.toLowerCase().endsWith(rule.slice(1).toLowerCase()))
-      return true;
+    if (!rule.includes("*") && rel.split(path.sep).includes(rule)) return true;
+    if (rule.startsWith("*.") && file.toLowerCase().endsWith(rule.slice(1).toLowerCase())) return true;
   }
-
   return false;
 }
 
-const records = files.filter(({file, source}) => !shouldExclude(file, source)).map(({ file, source }) => {
+const candidates = [];
+for (const source of fileSources) {
+  if (!fs.existsSync(source.path)) {
+    console.warn(`Skipped missing source: ${source.name}`);
+    continue;
+  }
+  for (const file of walkFiles(source.path)) {
+    if (path.basename(file).startsWith(".")) continue;
+    if (shouldExclude(file, source)) continue;
+    candidates.push({ file, source });
+  }
+}
+
+const records = candidates.map(({ file, source }) => {
   const stat = fs.statSync(file);
-  const rel = path.relative(p.root, file);
   const sourceRel = path.relative(source.path, file);
   const kind = kindFor(file);
+  const publicIdentity = `${source.name}\n${sourceRel}`;
 
   const rec = {
-    id: Buffer.from(rel).toString("base64url"),
+    id: crypto.createHash("sha256").update(publicIdentity).digest("hex").slice(0, 24),
     source: "Files",
     source_name: source.name,
-    source_root: source.path,
     source_relative_path: sourceRel,
     kind,
     name: path.basename(file),
     extension: path.extname(file).toLowerCase(),
-    path: rel,
-    folder: path.relative(p.root, path.dirname(file)),
+    folder: path.dirname(sourceRel) === "." ? "" : path.dirname(sourceRel),
     size_bytes: stat.size,
     created: stat.birthtime?.toISOString?.() || null,
     modified: stat.mtime?.toISOString?.() || null
   };
 
-  if (kind === "csv") {
+  // Privacy-first default: never copy row values or file content unless explicitly enabled.
+  if (kind === "csv" && source.content_sampling) {
     try {
       rec.csv_profile = parseCsvProfile(file);
     } catch (e) {
@@ -236,14 +195,8 @@ const records = files.filter(({file, source}) => !shouldExclude(file, source)).m
   return rec;
 });
 
-
 function tokenizeFileRecord(rec) {
-  const text = [
-    rec.name,
-    rec.folder,
-    rec.source_relative_path
-  ].join(" ").toLowerCase();
-
+  const text = [rec.name, rec.folder, rec.source_relative_path].join(" ").toLowerCase();
   return [...new Set(
     text
       .replace(/[^a-z0-9]+/g, " ")
@@ -256,20 +209,17 @@ function tokenizeFileRecord(rec) {
   )];
 }
 
-function buildFileSummary(records) {
+function buildFileSummary(items) {
   const topics = {};
   const byKind = {};
   const bySource = {};
-  const recent = [...records]
+  const recent = [...items]
     .sort((a,b) => String(b.modified).localeCompare(String(a.modified)))
     .slice(0, 100);
 
-  for (const rec of records) {
-    if (!byKind[rec.kind]) byKind[rec.kind] = [];
-    byKind[rec.kind].push(rec);
-
-    if (!bySource[rec.source_name]) bySource[rec.source_name] = [];
-    bySource[rec.source_name].push(rec);
+  for (const rec of items) {
+    byKind[rec.kind] = (byKind[rec.kind] || 0) + 1;
+    bySource[rec.source_name] = (bySource[rec.source_name] || 0) + 1;
 
     for (const token of tokenizeFileRecord(rec)) {
       if (!topics[token]) topics[token] = [];
@@ -277,7 +227,6 @@ function buildFileSummary(records) {
         topics[token].push({
           name: rec.name,
           kind: rec.kind,
-          path: rec.path,
           source_relative_path: rec.source_relative_path,
           modified: rec.modified,
           size_bytes: rec.size_bytes
@@ -288,17 +237,14 @@ function buildFileSummary(records) {
 
   return {
     generated_at: generatedAt,
-    file_count: records.length,
-    kind_counts: Object.fromEntries(
-      Object.entries(byKind).map(([k,v]) => [k, v.length]).sort((a,b) => b[1]-a[1])
-    ),
-    source_counts: Object.fromEntries(
-      Object.entries(bySource).map(([k,v]) => [k, v.length]).sort((a,b) => b[1]-a[1])
-    ),
+    privacy_mode: "metadata-first",
+    file_count: items.length,
+    kind_counts: Object.fromEntries(Object.entries(byKind).sort((a,b) => b[1]-a[1])),
+    source_counts: Object.fromEntries(Object.entries(bySource).sort((a,b) => b[1]-a[1])),
     recent_files: recent.map(rec => ({
       name: rec.name,
       kind: rec.kind,
-      path: rec.path,
+      source_name: rec.source_name,
       source_relative_path: rec.source_relative_path,
       modified: rec.modified,
       size_bytes: rec.size_bytes
@@ -313,32 +259,42 @@ for (const rec of records) {
   byKind[rec.kind].push(rec);
 }
 
-const recent = [...records].sort((a,b) => String(b.modified).localeCompare(String(a.modified))).slice(0, 250);
+const recent = [...records]
+  .sort((a,b) => String(b.modified).localeCompare(String(a.modified)))
+  .slice(0, 250);
 
 writeJson(path.join(outDir, "files-catalog.json"), {
   generated_at: generatedAt,
-  sources: fileSources.map(s => ({ name: s.name, path: s.path })),
+  privacy_mode: "metadata-first",
+  sources: fileSources.map(s => ({
+    name: s.name,
+    content_sampling: s.content_sampling
+  })),
   file_count: records.length,
   records
 });
 
 writeJson(path.join(outDir, "files-by-kind.json"), {
   generated_at: generatedAt,
+  privacy_mode: "metadata-first",
   kinds: Object.fromEntries(Object.entries(byKind).map(([k,v]) => [k, v.length])),
   records_by_kind: byKind
 });
 
 writeJson(path.join(outDir, "files-recent.json"), {
   generated_at: generatedAt,
+  privacy_mode: "metadata-first",
   file_count: recent.length,
   records: recent
 });
 
 writeJson(path.join(outDir, "files-summary.json"), buildFileSummary(records));
 
-console.log(`# GafBrain Files Catalog`);
-console.log(`Scanned sources:`);
-for (const source of fileSources) console.log(`- ${source.name}: ${source.path}`);
+console.log("# GafBrain Files Catalog");
+console.log("Privacy mode: metadata-first");
+for (const source of fileSources) {
+  console.log(`- ${source.name}${source.content_sampling ? " (CSV schema sampling enabled)" : ""}`);
+}
 console.log(`Files: ${records.length}`);
 console.log(`Kinds: ${Object.entries(byKind).map(([k,v]) => `${k}:${v.length}`).join(", ") || "none"}`);
 console.log(`Output: ${path.relative(p.root, outDir)}`);
