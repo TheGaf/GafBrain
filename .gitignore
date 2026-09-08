@@ -6,8 +6,9 @@ workspace/
 .DS_Store
 node_modules/
 npm-debug.log*
+config/sources.json
 
-# Backups
+# Backups / exports
 *_BACKUP*
 *_backup*
 *.zip
