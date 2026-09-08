@@ -1,23 +1,28 @@
 # Import Workflow
 
-1. Move the previous export from `Raw/ChatGPT/` into `Archive/ChatGPT-YYYY-MM-DD/`.
-2. Put the latest full ChatGPT export JSON files in `Raw/ChatGPT/`.
-3. From the GafBrain root, run:
+1. Move the previous export from `workspace/Raw/AI/ChatGPT/` into a dated folder under `workspace/Archive/`.
+2. Put the latest full ChatGPT export conversation file(s) in:
+
+```text
+workspace/Raw/AI/ChatGPT/
+```
+
+3. From the GafBrain repository root, run:
 
 ```bash
-npm run all
+npm run build
 ```
 
 4. Normalized conversations are written to:
 
 ```text
-Brain/ChatGPT/normalized/
+workspace/Brain/ChatGPT/normalized/
 ```
 
-5. AI-facing memory is written to:
+5. AI-facing indexes, timelines and lookup files are written to:
 
 ```text
-Brain/
+workspace/Brain/
 ```
 
-Do not keep weekly export piles inside `Raw/ChatGPT/`. Keep one current export set there and archive older sets.
+Keep one current export set in Raw and archive older sets. Raw exports and generated Brain files are private and excluded from Git.
