@@ -32,7 +32,7 @@ export function paths() {
 
   return {
     root,
-    appRoot: root,
+    appRoot: path.join(root, "app"),
     rawDir,
     brainDir,
     archiveDir,
@@ -42,7 +42,7 @@ export function paths() {
     reportsDir,
     projectsDir,
     sessionsDir,
-    templatesDir: path.join(root, "templates"),
+    templatesDir: path.join(root, "app", "templates"),
     // Compatibility aliases for older scripts. Brain is canonical.
     dataRoot: root,
     indexDir: brainDir,
@@ -159,12 +159,21 @@ export function emptyDirectory(dir) {
   }
 }
 
+function assertInside(base, target) {
+  const rel = path.relative(base, target);
+  if (rel.startsWith("..") || path.isAbsolute(rel)) {
+    throw new Error(`Unsafe generated-output path: ${target}`);
+  }
+}
+
 export function removeGeneratedBrainOutputs(p) {
   // Safety rule: only delete generated outputs inside Brain. Never touch Raw.
   ensureDir(p.brainDir);
   const targets = [
     "AI_UPLOAD",
     "ChatGPT/normalized",
+    "Search",
+    "VerbatimsByMonth",
     "months",
     "verbatims",
     "GAFBRAIN_INDEX.md",
@@ -173,6 +182,7 @@ export function removeGeneratedBrainOutputs(p) {
     "HISTORY.md",
     "PROJECT_INDEX.md",
     "MANIFEST.json",
+    "CURRENT_STATUS.json",
     "search-index.json",
     "verbatims.json",
     "timeline.json",
@@ -180,11 +190,15 @@ export function removeGeneratedBrainOutputs(p) {
   ];
   for (const rel of targets) {
     const full = path.join(p.brainDir, rel);
-    if (!full.startsWith(p.brainDir)) throw new Error(`Unsafe generated-output path: ${full}`);
+    assertInside(p.brainDir, full);
     fs.rmSync(full, { recursive: true, force: true });
   }
   for (const file of fs.existsSync(p.brainDir) ? fs.readdirSync(p.brainDir) : []) {
-    if (/^timeline-\d{4}\.json$/.test(file)) fs.rmSync(path.join(p.brainDir, file), { force: true });
+    if (/^timeline-\d{4}\.json$/.test(file)) {
+      const full = path.join(p.brainDir, file);
+      assertInside(p.brainDir, full);
+      fs.rmSync(full, { force: true });
+    }
   }
 }
 
@@ -215,13 +229,20 @@ export function installTemplates({ overwrite = false } = {}) {
   ];
 
   const installed = [];
+  const missing = [];
   for (const [templateName, outputName] of templateMap) {
     const src = path.join(p.templatesDir, templateName);
     const dest = path.join(p.brainDir, outputName);
-    if (!fs.existsSync(src)) continue;
+    if (!fs.existsSync(src)) {
+      missing.push(templateName);
+      continue;
+    }
     if (!overwrite && fs.existsSync(dest)) continue;
     fs.copyFileSync(src, dest);
     installed.push(path.relative(p.root, dest));
+  }
+  if (missing.length) {
+    throw new Error(`Missing GafBrain template(s): ${missing.join(", ")}`);
   }
   return installed;
 }
