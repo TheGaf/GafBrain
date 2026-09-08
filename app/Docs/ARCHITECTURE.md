@@ -2,20 +2,34 @@
 
 GafBrain is split into three zones.
 
-## Raw/
+## `workspace/Raw/`
 
-Immutable user-owned exports. The compiler reads this folder but never deletes it.
+Immutable user-owned exports. The compiler reads this folder but does not delete it.
 
-## Brain/
+ChatGPT exports live in:
+
+```text
+workspace/Raw/AI/ChatGPT/
+```
+
+## `workspace/Brain/`
 
 Generated AI-facing memory. This folder is reproducible and can be rebuilt from Raw.
 
-## app/
+Generated personal status, indexes, timelines and lookup files stay here rather than in the tracked repository root.
 
-Replaceable public framework code and docs.
+## `app/`
+
+Replaceable public framework code, docs and templates.
+
+Templates live in:
+
+```text
+app/templates/
+```
 
 ## Update principle
 
-Future releases should update `app/`, `templates/`, and docs.
+Framework updates may replace `app/` and public docs.
 
-They should not ship or modify user data in `Raw/`.
+They should not ship, modify or publish user data from `workspace/Raw/` or `workspace/Brain/`.
