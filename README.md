@@ -1,34 +1,77 @@
-# GafBrain 3.0
+# GafBrain
 
-> **GafBrain is a personal knowledge compiler that makes your accumulated knowledge available to any AI you choose—without transferring ownership of your data.**
+> **Your AI can change. Your Brain stays yours.**
 
-Compile your conversations and personal data into a private Brain that ChatGPT, Claude, Gemini, and future AI assistants can search and reason over.
+GafBrain turns your exported ChatGPT history into portable memory you control.
 
-Your original files stay where you want them.
+Projects. Decisions. Ideas. Things you tried. Things you changed your mind about. Instead of starting from zero with every AI, you keep the history and let the AI search it.
 
-Your AI can change.
-
-Your Brain stays yours.
+The public framework is currently **3.2.0-alpha**.
 
 ---
 
-# Current Status
+# Two Ways In
 
-**Version:** 3.0 Alpha
+## The easy version — no code
 
-### Supported
+You can get most of the idea without running the compiler:
 
-✅ ChatGPT Archives
+1. In ChatGPT go to **Settings → Data Controls → Export Data**.
+2. Download the export when the email arrives.
+3. Store it somewhere you control: Google Drive, Dropbox, iCloud, your own server, etc.
+4. Remove passwords, API keys, private keys, tokens, recovery codes and other secrets.
+5. Put [`MY_AI_BRAIN.md`](MY_AI_BRAIN.md) next to the archive.
+6. Give the archive + instruction file to an AI that can access and search those files.
 
-### In Progress
+That gives you portable memory without tying it to one AI company.
 
-- Reddit
+For smaller archives, or AI tools that can search the files directly, this may be all you need.
+
+For a big archive, better chronology, exact quote retrieval and reliable search, use the full compiler below.
+
+---
+
+# The Full GafBrain
+
+```text
+Your Data
+    ↓
+GafBrain Compiler
+    ↓
+Your Brain
+    ↓
+ChatGPT / Claude / Gemini / whatever comes next
+```
+
+GafBrain compiles your archive into a private Brain with:
+
+- ChatGPT archive compilation
+- normalized conversations
+- conversation timeline
+- exact quote search
+- searchable conversation index
+- AI upload bundle
+- snapshot archive support
+- local storage
+- Google Drive-compatible storage
+
+**Important distinction:** Google Drive can hold your GafBrain today. Compiling Google Drive itself as a source is separate work and is not currently the same thing as ChatGPT archive support.
+
+---
+
+# Current Support
+
+### Supported source
+
+- ✅ ChatGPT archives
+
+### Planned / evolving source compilers
+
 - Claude
-- Google Drive
-
-### Planned
-
+- Gemini
+- Reddit
 - Gmail
+- Google Drive content
 - Photos
 - GitHub
 - LinkedIn
@@ -36,55 +79,7 @@ Your Brain stays yours.
 - Presentations
 - Code
 
----
-
-# In 30 Seconds
-
-Most AI assistants only know what you tell them today.
-
-Meanwhile your knowledge is scattered across:
-
-- ChatGPT
-- Claude
-- Google Drive
-- Reddit
-- Gmail
-- GitHub
-- Photos
-
-GafBrain compiles those sources into one portable Brain.
-
-```
-Your Data
-
-↓
-
-GafBrain Compiler
-
-↓
-
-Your Brain
-
-↓
-
-ChatGPT
-Claude
-Gemini
-Future AI
-```
-
----
-
-# Current Features
-
-- ✅ ChatGPT archive compiler
-- ✅ Conversation timeline
-- ✅ Exact quote search
-- ✅ Searchable conversation index
-- ✅ AI upload bundle
-- ✅ Local compiler
-- ✅ Google Drive compatible
-- ✅ Snapshot archive support
+The public repo is the framework. Your generated private Brain is your data and can evolve separately.
 
 ---
 
@@ -94,25 +89,20 @@ Future AI
 
 https://nodejs.org
 
----
+## 2. Clone GafBrain
 
-## 2. Clone or download GafBrain
-
+```bash
+git clone https://github.com/TheGaf/GafBrain.git
+cd GafBrain
 ```
-git clone ...
-```
 
-or download the ZIP.
-
----
+Or download the ZIP.
 
 ## 3. Install
 
 ```bash
 npm install
 ```
-
----
 
 ## 4. Initialize
 
@@ -122,13 +112,11 @@ npm run init
 
 This creates your private workspace.
 
----
-
 ## 5. Add your ChatGPT export
 
-Copy your exported conversation files into:
+Copy the exported conversation file(s) into:
 
-```
+```text
 workspace/
     Raw/
         AI/
@@ -137,19 +125,17 @@ workspace/
 
 Supported formats:
 
-```
+```text
 conversations.json
 ```
 
 or
 
-```
+```text
 conversations-000.json
 conversations-001.json
 ...
 ```
-
----
 
 ## 6. Build
 
@@ -157,34 +143,12 @@ conversations-001.json
 npm run build
 ```
 
-This will:
-
-- discover exports
-- normalize conversations
-- build search indexes
-- generate timelines
-- create the AI upload bundle
-
----
+This will discover the export, normalize conversations, build indexes and timelines, and create the Brain.
 
 ## 7. Verify
 
 ```bash
 npm run doctor
-```
-
-Expected:
-
-```
-✓ ChatGPT export found
-
-✓ Brain created
-
-✓ Search index
-
-✓ Timeline
-
-Ready for AI.
 ```
 
 ---
@@ -193,27 +157,24 @@ Ready for AI.
 
 Give your AI access to:
 
-```
+```text
 workspace/Brain/
 ```
 
 Start with:
 
-```
-START HERE - GafBrain.md
-
+```text
+START_HERE.txt
 LOOKUP_GUIDE.md
 ```
 
 Suggested prompt:
 
-```
-Read START HERE - GafBrain.md and LOOKUP_GUIDE.md.
+```text
+Read START_HERE.txt and LOOKUP_GUIDE.md.
 
-Use my GafBrain Brain as the source of truth.
-
+Use my GafBrain as the source of truth for my history.
 Search structured JSON before Markdown.
-
 If evidence is missing, say so instead of guessing.
 ```
 
@@ -221,31 +182,22 @@ If evidence is missing, say so instead of guessing.
 
 # Example Questions
 
-- What was my fifth conversation?
-- When did I first mention GafBrain?
-- When did I rename Mybrary?
-- Show every April 2026 conversation.
-- What projects have I worked on most?
-- What themes keep appearing?
+- What did we decide about this?
+- When did I first mention this project?
+- Find the idea I had six months ago.
+- How has my thinking on this changed?
+- Show every conversation from a given month.
+- Find my exact wording about something.
+- Continue a project from where I left off.
 
 ---
 
 # Updating Your Brain
 
-When you receive a new export:
+When you receive a new ChatGPT export:
 
-1. Move the previous export into:
-
-```
-workspace/Archive/
-```
-
-2. Copy the new export into:
-
-```
-workspace/Raw/
-```
-
+1. Move the previous export into `workspace/Archive/`.
+2. Copy the new export into `workspace/Raw/`.
 3. Rebuild:
 
 ```bash
@@ -258,39 +210,12 @@ Done.
 
 # Commands
 
-Initialize
-
 ```bash
 npm run init
-```
-
-Build
-
-```bash
 npm run build
-```
-
-Verify
-
-```bash
 npm run doctor
-```
-
-Search
-
-```bash
 npm run search
-```
-
-Recall
-
-```bash
 npm run recall -- keyword
-```
-
-Status
-
-```bash
 npm run brain:status
 ```
 
@@ -298,116 +223,66 @@ npm run brain:status
 
 # Folder Structure
 
-```
+```text
 GafBrain/
-
-app/
-workspace/
-
-README.md
-package.json
-.gitignore
+    app/
+    workspace/
+    README.md
+    package.json
+    .gitignore
 ```
 
-### app/
+### `app/`
 
 The public framework.
 
-Replace this folder whenever a new version of GafBrain is released.
-
----
-
-### workspace/
+### `workspace/`
 
 Your private knowledge.
 
-Never commit this folder to GitHub.
+**Never commit this folder to GitHub.** It is excluded by `.gitignore`.
 
-```
+```text
 workspace/
-
-Raw/
-Brain/
-Archive/
-Reports/
+    Raw/
+    Brain/
+    Archive/
+    Reports/
 ```
 
 ---
 
-# Collections
+# Security
 
-GafBrain is organized around collections.
+Your archive can contain things you forgot you ever typed.
 
-Current:
+Before making it portable, remove actual secrets such as:
 
-```
-AI
-    ChatGPT
-```
+- passwords
+- API keys
+- private keys
+- access tokens
+- authentication cookies
+- recovery codes
 
-Planned:
-
-```
-AI
-    Claude
-    Gemini
-
-Social
-    Reddit
-    LinkedIn
-
-Email
-    Gmail
-
-Files
-    Google Drive
-
-Photos
-
-Code
-
-Documents
-
-Presentations
-```
-
-Each collection has its own compiler.
-
-Every compiler contributes to the same Brain.
-
----
-
-# Updating GafBrain
-
-Updating GafBrain should never affect your personal data.
-
-Replace:
-
-```
-app/
-```
-
-Leave:
-
-```
-workspace/
-```
-
-Your Brain will continue to work with the new compiler.
+The Brain can remember that a credential exists and where you keep it securely. It should not contain the credential itself.
 
 ---
 
 # Philosophy
 
-```
+```text
 Raw is sacred.
-
 Brain is reproducible.
-
 Framework is replaceable.
-
 Your knowledge is permanent.
 ```
+
+Your data is the source material.
+
+Your Brain is yours.
+
+The AI is just the interface.
 
 ---
 
