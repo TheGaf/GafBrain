@@ -1,0 +1,31 @@
+{
+  "files": [
+    {
+      "name": "My Files",
+      "path": "/path/to/a/folder/you/control",
+      "content_sampling": false,
+      "exclude": [
+        ".git",
+        "node_modules",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "dist",
+        "build",
+        ".DS_Store",
+        "*.zip",
+        "*.dmg",
+        "*.pyc",
+        "*.so",
+        "*.dylib",
+        "*.dll",
+        "*.exe",
+        "*.class",
+        "*.jar",
+        "*.o",
+        "*.a",
+        "*.obj"
+      ]
+    }
+  ]
+}
