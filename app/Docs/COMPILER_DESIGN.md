@@ -7,29 +7,38 @@ GafBrain's compiler is intentionally simple.
 Latest full ChatGPT export:
 
 ```text
-Raw/ChatGPT/
+workspace/Raw/AI/ChatGPT/
+```
+
+Supported conversation files include:
+
+```text
+conversations.json
+conversations-000.json
+conversations-001.json
+...
 ```
 
 ## Output
 
 ```text
-Brain/ChatGPT/normalized/
-Brain/search-index.json
-Brain/verbatims.json
-Brain/timeline.json
-Brain/months/
-Brain/verbatims/
-Brain/AI_UPLOAD/
+workspace/Brain/ChatGPT/normalized/
+workspace/Brain/search-index.json
+workspace/Brain/verbatims.json
+workspace/Brain/timeline.json
+workspace/Brain/months/
+workspace/Brain/verbatims/
+workspace/Brain/AI_UPLOAD/
 ```
 
 ## Philosophy
 
-Raw is sacred. Brain is reproducible. Framework is disposable.
+Raw is sacred. Brain is reproducible. Framework is replaceable.
 
 Regenerate compiled memory from the latest full export.
 
-## Text-first rule
+## Retrieval rule
 
-Search text first.
+Use small structured lookup files first. Open normalized Markdown only when full conversation context is needed.
 
-Only pull non-text assets when the user asks or the task clearly requires it.
+Non-text file cataloging is optional and separate from the core ChatGPT compiler.
