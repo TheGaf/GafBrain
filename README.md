@@ -20,14 +20,12 @@ You can get most of the idea without running the compiler:
 2. Download the export when the email arrives.
 3. Store it somewhere you control: Google Drive, Dropbox, iCloud, your own server, etc.
 4. Remove passwords, API keys, private keys, tokens, recovery codes and other secrets.
-5. Put [`MY_AI_BRAIN.md`](MY_AI_BRAIN.md) next to the archive.
-6. Give the archive + instruction file to an AI that can access and search those files.
+5. Put [`MY_AI_BRAIN.md`](MY_AI_BRAIN.md) next to the exported files.
+6. Give those files to an AI that supports file or connected-drive search.
 
 That gives you portable memory without tying it to one AI company.
 
-For smaller archives, or AI tools that can search the files directly, this may be all you need.
-
-For a big archive, better chronology, exact quote retrieval and reliable search, use the full compiler below.
+For smaller archives, this may be all you need. Large archives can become awkward for an AI to search directly; that is what the full compiler below is for.
 
 ---
 
@@ -110,7 +108,7 @@ npm install
 npm run init
 ```
 
-This creates your private workspace.
+This creates your private workspace and installs the Brain instruction templates.
 
 ## 5. Add your ChatGPT export
 
@@ -143,7 +141,7 @@ conversations-001.json
 npm run build
 ```
 
-This will discover the export, normalize conversations, build indexes and timelines, and create the Brain.
+This discovers the export, normalizes conversations, builds indexes and timelines, and creates the Brain.
 
 ## 7. Verify
 
@@ -164,14 +162,14 @@ workspace/Brain/
 Start with:
 
 ```text
-START_HERE.txt
+START HERE - GafBrain.md
 LOOKUP_GUIDE.md
 ```
 
 Suggested prompt:
 
 ```text
-Read START_HERE.txt and LOOKUP_GUIDE.md.
+Read "START HERE - GafBrain.md" and "LOOKUP_GUIDE.md".
 
 Use my GafBrain as the source of truth for my history.
 Search structured JSON before Markdown.
@@ -197,7 +195,7 @@ If evidence is missing, say so instead of guessing.
 When you receive a new ChatGPT export:
 
 1. Move the previous export into `workspace/Archive/`.
-2. Copy the new export into `workspace/Raw/`.
+2. Copy the new export into `workspace/Raw/AI/ChatGPT/`.
 3. Rebuild:
 
 ```bash
@@ -208,15 +206,48 @@ Done.
 
 ---
 
+# Optional File Catalog
+
+GafBrain can also build a metadata catalog of folders you explicitly choose.
+
+Copy:
+
+```text
+config/sources.example.json
+```
+
+to:
+
+```text
+config/sources.json
+```
+
+and edit the local path. `config/sources.json` is gitignored.
+
+By default the catalog is **metadata-first**: filename, relative path, type, size and dates. It does not copy CSV row values. CSV schema sampling must be explicitly enabled with:
+
+```json
+"content_sampling": true
+```
+
+Then run:
+
+```bash
+npm run catalog:files
+```
+
+---
+
 # Commands
 
 ```bash
 npm run init
 npm run build
 npm run doctor
-npm run search
-npm run recall -- keyword
+npm run search -- "terms"
+npm run recall -- "keyword"
 npm run brain:status
+npm run catalog:files
 ```
 
 ---
@@ -226,8 +257,10 @@ npm run brain:status
 ```text
 GafBrain/
     app/
+    config/
     workspace/
     README.md
+    MY_AI_BRAIN.md
     package.json
     .gitignore
 ```
@@ -238,7 +271,7 @@ The public framework.
 
 ### `workspace/`
 
-Your private knowledge.
+Your private knowledge and generated Brain.
 
 **Never commit this folder to GitHub.** It is excluded by `.gitignore`.
 
@@ -247,7 +280,7 @@ workspace/
     Raw/
     Brain/
     Archive/
-    Reports/
+    Releases/
 ```
 
 ---
@@ -266,6 +299,8 @@ Before making it portable, remove actual secrets such as:
 - recovery codes
 
 The Brain can remember that a credential exists and where you keep it securely. It should not contain the credential itself.
+
+Local machine paths and source-folder configuration belong in `config/sources.json`, which is intentionally not tracked by Git.
 
 ---
 
