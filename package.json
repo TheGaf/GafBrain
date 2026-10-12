@@ -22,7 +22,8 @@
     "build": "npm run all && npm run doctor",
     "doctor": "node app/Compiler/doctor.js",
     "catalog:files": "node app/Compiler/compile-files.js",
-    "build:files": "npm run catalog:files"
+    "build:files": "npm run catalog:files",
+    "update:chatgpt": "node app/Compiler/update-chatgpt.js"
   },
   "dependencies": {}
 }
