@@ -1,6 +1,10 @@
 # GafBrain
 
-> **Your AI can change. Your Brain stays yours.**
+> **What if your chat agent had a persistent memory? **
+
+More than that: what if it could remember past conversations VERBATIM? Could pull up old code or images VERBATIM? Not just a simple memory of you, but the full you.
+
+Well, now you can.
 
 GafBrain turns your exported ChatGPT history into portable memory you control.
 
@@ -76,6 +80,8 @@ GafBrain compiles your archive into a private Brain with:
 - Documents
 - Presentations
 - Code
+
+There's no reason these can't work right now, but I haven't fully tested with other agents or APIs. I myself have incorporated my full Linkedin, Reddit, and Google ecosystem (Drive, Gmail, Calendar) for a more complete Brain.
 
 The public repo is the framework. Your generated private Brain is your data and can evolve separately.
 
