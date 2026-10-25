@@ -1,0 +1,22 @@
+name: ChatGPT ingestion smoke tests
+on:
+  push:
+    paths:
+      - 'app/Compiler/update-chatgpt.js'
+      - 'tests/update-chatgpt.test.mjs'
+      - '.github/workflows/ingestion-smoke.yml'
+  pull_request:
+    paths:
+      - 'app/Compiler/update-chatgpt.js'
+      - 'tests/update-chatgpt.test.mjs'
+      - '.github/workflows/ingestion-smoke.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app/Compiler/update-chatgpt.js
+      - run: node tests/update-chatgpt.test.mjs

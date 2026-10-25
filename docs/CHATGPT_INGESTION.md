@@ -85,7 +85,7 @@ npm run brain:status
 
 `npm run build` already includes `npm run doctor`. **The external file catalog step uses your local catalog configuration, if configured.**
 
-**Important safety limitation:** The current updater does **not** provide an automatic rollback after replacing the previous current export. A verified independent backup is essential. Do not rerun a failed update without inspecting the error and current files.
+**Recovery behavior (updated importer):** The updater retains the previous raw export during rebuild. If build/catalog/status fails, it attempts to restore the previous raw directory and rebuild the previous Brain, keeping the failed new export in `workspace/Raw/AI/ChatGPT.__failed/` for inspection. This is not a substitute for an independently verified backup: interruption, permissions, and disk failure can defeat automatic recovery. Stop and inspect any failure before retrying.
 
 ### 6. Validate the result
 
@@ -117,7 +117,7 @@ The index is retrieval evidence, not permission for an AI to invent titles, date
 ## If the update fails
 
 1. **Stop.** Do not automatically rerun the importer.
-2. Preserve logs, the new ZIP, extracted folder, and the verified previous backup.
+2. Preserve logs, the new ZIP, extracted folder, and the verified previous backup. Check for `ChatGPT.__incoming`, `ChatGPT.__previous`, or `ChatGPT.__failed` alongside the live raw directory. Do not delete them automatically.
 3. Inspect `workspace/Raw/AI/ChatGPT/` and run `npm run doctor` to understand the current state.
 4. If the raw export needs restoration, **make an additional copy of the current failed state before restoring**. Carefully restore the backed-up current export; do not overwrite a valuable `Historical/` folder with older contents.
 5. Rebuild from the restored source using `npm run build`, then verify with `npm run doctor`. If a local external file catalog is enabled, run `npm run catalog:files`.
@@ -134,4 +134,4 @@ Only framework source code and generic documentation belong in this public repos
 
 ## Notes for maintainers
 
-The CLI's staging step is not a transactional rollback system: staging and validation alone do not protect against a later build failure, disk errors, or interruption during replacement. Future work should add an atomic swap/rollback mechanism and tests for truncated JSON files, duplicate splits, and partial failures. Until then, **verified backups and post-run validation are required**.
+The update uses a staged directory and keeps the old raw directory until the new build succeeds; on an ordinary child-process failure it attempts raw-data rollback and rebuild. It is still **not crash-safe** or transactional across all outputs, and does not replace an independent backup. Existing `ChatGPT.__incoming`, `ChatGPT.__previous`, and `ChatGPT.__failed` directories must be inspected manually before retrying.

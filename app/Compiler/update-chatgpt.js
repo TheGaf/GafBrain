@@ -28,14 +28,27 @@ const sourceDir = path.resolve(sourceArg);
 const rawDir = path.join(p.rawDir, "AI", "ChatGPT");
 const historicalDir = path.join(rawDir, "Historical");
 const stagingDir = path.join(p.rawDir, "AI", "ChatGPT.__incoming");
+const previousDir = path.join(p.rawDir, "AI", "ChatGPT.__previous");
 
 if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
   console.error(`Source folder not found: ${sourceDir}`);
   process.exit(1);
 }
 
-ensureDir(rawDir);
-ensureDir(historicalDir);
+// Never allow an export source inside the managed raw directory or staging areas.
+const inside = (parent, candidate) => {
+  const relative = path.relative(parent, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+};
+if (inside(path.join(p.rawDir, "AI"), sourceDir) || inside(sourceDir, rawDir)) {
+  console.error("Export source overlaps managed raw data. Choose a separate extracted export folder.");
+  process.exit(1);
+}
+if (fs.existsSync(previousDir) || fs.existsSync(stagingDir)) {
+  console.error("A previous/staged update directory exists. Inspect it before retrying; nothing was changed.");
+  process.exit(1);
+}
+ensureDir(path.dirname(rawDir));
 
 /*
  * Stage the new export first.
@@ -43,10 +56,6 @@ ensureDir(historicalDir);
  * We do NOT touch the current export until the new export has been
  * successfully copied. Historical is never included in this staging area.
  */
-if (fs.existsSync(stagingDir)) {
-  fs.rmSync(stagingDir, { recursive: true, force: true });
-}
-
 fs.cpSync(sourceDir, stagingDir, {
   recursive: true,
   force: true
@@ -81,8 +90,11 @@ for (const name of conversationFiles) {
   }
   try {
     const parsed = JSON.parse(fs.readFileSync(stagedFile, "utf8"));
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      throw new Error("Expected a non-empty conversations array");
+    const conversations = Array.isArray(parsed) ? parsed
+      : Array.isArray(parsed?.conversations) ? parsed.conversations
+      : Array.isArray(parsed?.items) ? parsed.items : null;
+    if (!conversations || conversations.length === 0) {
+      throw new Error("Expected a non-empty conversation collection");
     }
   } catch (error) {
     console.error(`Invalid staged conversation file ${name}: ${error.message}`);
@@ -93,35 +105,23 @@ for (const name of conversationFiles) {
 console.log(`Validated ${conversationFiles.length} staged conversation file(s) before replacement.`);
 
 /*
- * Remove the previous CURRENT export only.
- * Historical contains rescued conversations no longer available from
- * ChatGPT and must survive every update.
+ * Keep the entire previous raw export available for rollback until the build
+ * completes. Preserve Historical by copying it into staged raw before switch.
  */
-const preservedNames = new Set(["Historical"]);
-
-for (const name of fs.readdirSync(rawDir)) {
-  if (preservedNames.has(name)) continue;
-
-  fs.rmSync(path.join(rawDir, name), {
-    recursive: true,
-    force: true
+const previousExists = fs.existsSync(rawDir);
+const historicalSource = path.join(rawDir, "Historical");
+if (fs.existsSync(historicalSource)) {
+  fs.cpSync(historicalSource, path.join(stagingDir, "Historical"), {
+    recursive: true, force: false, errorOnExist: true
   });
 }
-
-/*
- * Move the staged export into the live Raw/AI/ChatGPT directory.
- */
-for (const name of fs.readdirSync(stagingDir)) {
-  const from = path.join(stagingDir, name);
-  const to = path.join(rawDir, name);
-
-  fs.renameSync(from, to);
+if (previousExists) fs.renameSync(rawDir, previousDir);
+try {
+  fs.renameSync(stagingDir, rawDir);
+} catch (error) {
+  if (previousExists && fs.existsSync(previousDir)) fs.renameSync(previousDir, rawDir);
+  throw error;
 }
-
-fs.rmSync(stagingDir, {
-  recursive: true,
-  force: true
-});
 
 function run(command, args) {
   console.log(`\n> ${command} ${args.join(" ")}\n`);
@@ -133,16 +133,41 @@ function run(command, args) {
   });
 
   if (result.status !== 0) {
-    process.exit(result.status || 1);
+    throw new Error(`${command} ${args.join(" ")} exited with status ${result.status ?? "unknown"}`);
   }
 }
 
-console.log(`Replaced current ChatGPT export with: ${sourceDir}`);
-console.log(`Preserved historical conversations in: ${path.relative(p.root, historicalDir)}`);
-console.log("Rolling ChatGPT export archives: disabled");
+console.log(`Activated ChatGPT export: ${sourceDir}`);
+console.log(`Historical preserved in: ${path.relative(p.root, historicalDir)}`);
 
-run("npm", ["run", "build"]);
-run("npm", ["run", "catalog:files"]);
-run("npm", ["run", "brain:status"]);
+try {
+  run("npm", ["run", "build"]);
+  run("npm", ["run", "catalog:files"]);
+  run("npm", ["run", "brain:status"]);
+} catch (error) {
+  console.error(`Update failed: ${error.message}`);
+  const failedDir = path.join(p.rawDir, "AI", "ChatGPT.__failed");
+  if (fs.existsSync(failedDir)) {
+    console.error("Cannot roll back automatically: ChatGPT.__failed already exists.");
+    process.exitCode = 1;
+  } else if (previousExists && fs.existsSync(previousDir)) {
+    fs.renameSync(rawDir, failedDir);
+    fs.renameSync(previousDir, rawDir);
+    console.error("Restored previous raw export; failed new export kept in ChatGPT.__failed.");
+    try {
+      run("npm", ["run", "build"]);
+      console.error("Previous Brain rebuilt. Verify with npm run doctor.");
+    } catch (restoreError) {
+      console.error(`Previous Brain rebuild failed: ${restoreError.message}`);
+    }
+    process.exitCode = 1;
+  } else {
+    console.error("No previous raw export available for automatic rollback.");
+    process.exitCode = 1;
+  }
+}
 
-console.log("\n✓ GafBrain update complete.");
+if (!process.exitCode) {
+  if (previousExists) fs.rmSync(previousDir, { recursive: true, force: true });
+  console.log("\\n✓ GafBrain update complete.");
+}

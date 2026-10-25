@@ -209,7 +209,7 @@ For **GafBrain 3.2**, use the built-in updater, not the older manual archive rot
 npm run update:chatgpt -- "/absolute/path/to/extracted/export"
 ```
 
-The updater preserves `workspace/Raw/AI/ChatGPT/Historical/`, stages and replaces the current export, runs `npm run build` (including `doctor`), rebuilds the optional file catalog, and reports status. **It does not provide automatic rollback**, so preserve your verified backup until validation succeeds.
+The updater preserves `workspace/Raw/AI/ChatGPT/Historical/`, stages and replaces the current export, runs `npm run build` (including `doctor`), rebuilds the optional file catalog, and reports status. **If a build or status command fails, the updater attempts to restore the previous raw export and rebuild the prior Brain.** This is not guaranteed against interruption or disk failure, so preserve your verified backup until validation succeeds.
 
 **Full, macOS-compatible import and recovery instructions:** [ChatGPT Ingestion Guide](docs/CHATGPT_INGESTION.md).
 
