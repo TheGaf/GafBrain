@@ -198,17 +198,20 @@ If evidence is missing, say so instead of guessing.
 
 # Updating Your Brain
 
-When you receive a new ChatGPT export:
+For **GafBrain 3.2**, use the built-in updater, not the older manual archive rotation procedure.
 
-1. Move the previous export into `workspace/Archive/`.
-2. Copy the new export into `workspace/Raw/AI/ChatGPT/`.
-3. Rebuild:
+1. Download your new ChatGPT export ZIP and keep the original.
+2. Extract it to a **separate directory outside the workspace**.
+3. Make and verify an independent backup of the existing current raw export.
+4. From the GafBrain project root, run:
 
 ```bash
-npm run build
+npm run update:chatgpt -- "/absolute/path/to/extracted/export"
 ```
 
-Done.
+The updater preserves `workspace/Raw/AI/ChatGPT/Historical/`, stages and replaces the current export, runs `npm run build` (including `doctor`), rebuilds the optional file catalog, and reports status. **It does not provide automatic rollback**, so preserve your verified backup until validation succeeds.
+
+**Full, macOS-compatible import and recovery instructions:** [ChatGPT Ingestion Guide](docs/CHATGPT_INGESTION.md).
 
 ---
 
