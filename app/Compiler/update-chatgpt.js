@@ -57,6 +57,41 @@ if (!fs.existsSync(stagingDir) || fs.readdirSync(stagingDir).length === 0) {
   process.exit(1);
 }
 
+// Validate the staged conversation splits BEFORE touching the current export.
+// An arbitrary nonempty directory is not a valid ChatGPT export.
+const stagedNames = fs.readdirSync(stagingDir);
+const conversationFiles = stagedNames.filter(name =>
+  name === "conversations.json" || /^conversations-\d+\.json$/.test(name)
+);
+if (!conversationFiles.length) {
+  console.error("No conversation JSON files in staged export. Current export was not changed.");
+  process.exit(1);
+}
+if (conversationFiles.includes("conversations.json") && conversationFiles.length > 1) {
+  console.error("Mixed conversations.json and numbered splits. Current export was not changed.");
+  process.exit(1);
+}
+for (const name of conversationFiles) {
+  const sourceFile = path.join(sourceDir, name);
+  const stagedFile = path.join(stagingDir, name);
+  if (!fs.statSync(stagedFile).isFile() ||
+      fs.statSync(stagedFile).size !== fs.statSync(sourceFile).size) {
+    console.error(`Incomplete staged export file: ${name}. Current export was not changed.`);
+    process.exit(1);
+  }
+  try {
+    const parsed = JSON.parse(fs.readFileSync(stagedFile, "utf8"));
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error("Expected a non-empty conversations array");
+    }
+  } catch (error) {
+    console.error(`Invalid staged conversation file ${name}: ${error.message}`);
+    console.error("Current export was not changed.");
+    process.exit(1);
+  }
+}
+console.log(`Validated ${conversationFiles.length} staged conversation file(s) before replacement.`);
+
 /*
  * Remove the previous CURRENT export only.
  * Historical contains rescued conversations no longer available from
